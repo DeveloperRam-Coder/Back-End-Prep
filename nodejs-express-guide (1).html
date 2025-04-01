@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js & Express CRUD Guide</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.3/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a5276;
+            --secondary: #3498db;
+            --accent: #2ecc71;
+            --background: #f5f7fa;
+            --text: #333;
+            --code-bg: #f0f2f5;
+            --card-bg: #fff;
+            --border: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--secondary);
+        }
+
+        .tab.active {
+            color: var(--secondary);
+        }
+
+        .tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--secondary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin: 1.5rem 0 1rem;
+        }
+
+        p, ul, ol {
+            margin-bottom: 1.2rem;
+        }
+
+        ul, ol {
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1.2rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            position: relative;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #333;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--code-bg);
+        }
+
+        .mermaid {
+            margin: 2rem auto;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .highlight {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+            
+            .tab {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Node.js & Express CRUD Operations Guide</h1>
+        <div class="subtitle">A comprehensive guide to building RESTful APIs</div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="tutorial">Tutorial</div>
+            <div class="tab" data-tab="flowchart">Flowchart</div>
+        </div>
+
+        <div id="tutorial" class="tab-content active">
+            <div class="section">
+                <h2>1. Setup & Installation</h2>
+                <h3>1.1. Initialize your project</h3>
+                <p>Create a new directory for your project and initialize it with npm:</p>
+                <pre><code>mkdir express-crud-api
+cd express-crud-api
+npm init -y</code><button class="copy-btn">Copy</button></pre>
+
+                <h3>1.2. Install dependencies</h3>
+                <p>Install Express and other necessary packages:</p>
+                <pre><code>npm install express mongoose body-parser cors dotenv</code><button class="copy-btn">Copy</button></pre>
+                
+                <div class="highlight">
+                    <p><strong>Package purposes:</strong></p>
+                    <ul>
+                        <li><strong>express:</strong> Web framework for Node.js</li>
+                        <li><strong>mongoose:</strong> MongoDB object modeling tool</li>
+                        <li><strong>body-parser:</strong> Parse incoming request bodies</li>
+                        <li><strong>cors:</strong> Enable Cross-Origin Resource Sharing</li>
+                        <li><strong>dotenv:</strong> Load environment variables from .env file</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>2. Project Structure</h2>
+                <p>Organize your project files as follows:</p>
+                <pre><code>express-crud-api/
+├── node_modules/
+├── models/
+│   └── model.js
+├── routes/
+│   └── routes.js
+├── controllers/
+│   └── controller.js
+├── config/
+│   └── db.js
+├── .env
+├── server.js
+└── package.json</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>3. Database Configuration</h2>
+                <h3>3.1. Create .env file</h3>
+                <p>Create a .env file in the root directory to store your MongoDB connection string:</p>
+                <pre><code>MONGO_URI=mongodb://localhost:27017/your_database
+PORT=3000</code><button class="copy-btn">Copy</button></pre>
+
+                <h3>3.2. Configure database connection</h3>
+                <p>Create <code>config/db.js</code> to handle the database connection:</p>
+                <pre><code>const mongoose = require('mongoose');
+require('dotenv').config();
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error.message);
+    process.exit(1);
+  }
+};
+
+module.exports = connectDB;</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>4. Create Data Model</h2>
+                <p>Define your data model in <code>models/model.js</code>:</p>
+                <pre><code>const mongoose = require('mongoose');
+
+const ItemSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: String,
+    trim: true
+  },
+  category: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  inStock: {
+    type: Boolean,
+    default: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model('Item', ItemSchema);</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>5. Create Controllers</h2>
+                <p>Implement the controller functions in <code>controllers/controller.js</code>:</p>
+                <pre><code>const Item = require('../models/model');
+
+// Get all items
+exports.getItems = async (req, res) => {
+  try {
+    const items = await Item.find();
+    res.status(200).json({
+      success: true,
+      count: items.length,
+      data: items
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
+};
+
+// Get single item
+exports.getItem = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+    
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        error: 'Item not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: item
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
+};
+
+// Create new item
+exports.createItem = async (req, res) => {
+  try {
+    const item = await Item.create(req.body);
+    
+    res.status(201).json({
+      success: true,
+      data: item
+    });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      
+      return res.status(400).json({
+        success: false,
+        error: messages
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Server Error'
+      });
+    }
+  }
+};
+
+// Update item
+exports.updateItem = async (req, res) => {
+  try {
+    const item = await Item.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        error: 'Item not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: item
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
+};
+
+// Delete item
+exports.deleteItem = async (req, res) => {
+  try {
+    const item = await Item.findByIdAndDelete(req.params.id);
+    
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        error: 'Item not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
+};</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>6. Define Routes</h2>
+                <p>Create the routes in <code>routes/routes.js</code>:</p>
+                <pre><code>const express = require('express');
+const router = express.Router();
+const {
+  getItems,
+  getItem,
+  createItem,
+  updateItem,
+  deleteItem
+} = require('../controllers/controller');
+
+router
+  .route('/')
+  .get(getItems)
+  .post(createItem);
+
+router
+  .route('/:id')
+  .get(getItem)
+  .put(updateItem)
+  .delete(deleteItem);
+
+module.exports = router;</code><button class="copy-btn">Copy</button></pre>
+
+                <h3>API Routes Summary</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Route</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>GET</td>
+                            <td>/api/items</td>
+                            <td>Get all items</td>
+                        </tr>
+                        <tr>
+                            <td>GET</td>
+                            <td>/api/items/:id</td>
+                            <td>Get single item</td>
+                        </tr>
+                        <tr>
+                            <td>POST</td>
+                            <td>/api/items</td>
+                            <td>Create new item</td>
+                        </tr>
+                        <tr>
+                            <td>PUT</td>
+                            <td>/api/items/:id</td>
+                            <td>Update item</td>
+                        </tr>
+                        <tr>
+                            <td>DELETE</td>
+                            <td>/api/items/:id</td>
+                            <td>Delete item</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>7. Create Server</h2>
+                <p>Set up your server in <code>server.js</code>:</p>
+                <pre><code>const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const connectDB = require('./config/db');
+require('dotenv').config();
+
+// Connect to database
+connectDB();
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// Routes
+app.use('/api/items', require('./routes/routes'));
+
+// Home route
+app.get('/', (req, res) => {
+  res.send('Welcome to the CRUD API');
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>8. Test Your API</h2>
+                <h3>8.1. Start the server</h3>
+                <pre><code>npm start</code><button class="copy-btn">Copy</button></pre>
+                <p>You might want to add this to your package.json scripts section:</p>
+                <pre><code>"scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+}</code><button class="copy-btn">Copy</button></pre>
+
+                <h3>8.2. Testing with Postman or curl</h3>
+                <p>Here are some curl commands to test your API:</p>
+
+                <p><strong>Create a new item:</strong></p>
+                <pre><code>curl -X POST -H "Content-Type: application/json" -d '{
+  "name": "Test Item",
+  "description": "This is a test item",
+  "category": "Test",
+  "price": 19.99,
+  "inStock": true
+}' http://localhost:3000/api/items</code><button class="copy-btn">Copy</button></pre>
+
+                <p><strong>Get all items:</strong></p>
+                <pre><code>curl http://localhost:3000/api/items</code><button class="copy-btn">Copy</button></pre>
+
+                <p><strong>Get a single item:</strong></p>
+                <pre><code>curl http://localhost:3000/api/items/ITEM_ID</code><button class="copy-btn">Copy</button></pre>
+
+                <p><strong>Update an item:</strong></p>
+                <pre><code>curl -X PUT -H "Content-Type: application/json" -d '{
+  "name": "Updated Item",
+  "price": 24.99
+}' http://localhost:3000/api/items/ITEM_ID</code><button class="copy-btn">Copy</button></pre>
+
+                <p><strong>Delete an item:</strong></p>
+                <pre><code>curl -X DELETE http://localhost:3000/api/items/ITEM_ID</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>9. Error Handling</h2>
+                <p>For better error handling, you can create a middleware in <code>middleware/errorHandler.js</code>:</p>
+                <pre><code>const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  
+  res.status(err.statusCode || 500).json({
+    success: false,
+    error: err.message || 'Server Error'
+  });
+};
+
+module.exports = errorHandler;</code><button class="copy-btn">Copy</button></pre>
+
+                <p>Then add it to your server.js:</p>
+                <pre><code>const errorHandler = require('./middleware/errorHandler');
+
+// After routes
+app.use(errorHandler);</code><button class="copy-btn">Copy</button></pre>
+            </div>
+
+            <div class="section">
+                <h2>10. Next Steps</h2>
+                <ul>
+                    <li>Add authentication with JWT</li>
+                    <li>Implement data validation with Joi or express-validator</li>
+                    <li>Add pagination for large datasets</li>
+                    <li>Implement file uploads</li>
+                    <li>Create a front-end interface</li>
+                    <li>Deploy your API to a hosting service</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="flowchart" class="tab-content">
+            <div class="section">
+                <h2>Node.js & Express CRUD API Development Flow</h2>
+                <p>This flowchart illustrates the development process and components of a Node.js & Express CRUD API:</p>
+                
+                <div class="mermaid">
+graph TB
+    subgraph "Setup"
+        A[Project Initialization] --> B[Install Dependencies]
+        B --> C[Create Project Structure]
+    end
+    
+    subgraph "Configuration"
+        C --> D[Environment Variables]
+        D --> E[Database Configuration]
+    end
+    
+    subgraph "Core Components"
+        E --> F[Data Models]
+        F --> G[Controllers]
+        G --> H[Routes]
+        H --> I[Server Setup]
+    end
+    
+    subgraph "Testing & Deployment"
+        I --> J[API Testing]
+        J --> K[Error Handling]
+        K --> L[Deployment]
+    end
+    
+    subgraph "API Endpoints"
+        M[GET /api/items] 
+        N[GET /api/items/:id]
+        O[POST /api/items]
+        P[PUT /api/items/:id]
+        Q[DELETE /api/items/:id]
+    end
+    
+    H --> M
+    H --> N
+    H --> O
+    H --> P
+    H --> Q
+    
+    subgraph "Controller Functions"
+        R[getItems]
+        S[getItem]
+        T[createItem]
+        U[updateItem]
+        V[deleteItem]
+    end
+    
+    G --> R
+    G --> S
+    G --> T
+    G --> U
+    G --> V
+    
+    R --> M
+    S --> N
+    T --> O
+    U --> P
+    V --> Q
+    
+    style A fill:#d4f1f9,stroke:#1a5276
+    style B fill:#d4f1f9,stroke:#1a5276
+    style C fill:#d4f1f9,stroke:#1a5276
+    style D fill:#d5f5e3,stroke:#1a5276
+    style E fill:#d5f5e3,stroke:#1a5276
+    style F fill:#fadbd8,stroke:#1a5276
+    style G fill:#fadbd8,stroke:#1a5276
+    style H fill:#fadbd8,stroke:#1a5276
+    style I fill:#fadbd8,stroke:#1a5276
+    style J fill:#fdebd0,stroke:#1a5276
+    style K fill:#fdebd0,stroke:#1a5276
+    style L fill:#fdebd0,stroke:#1a5276
+    style M fill:#ebdef0,stroke:#1a5276
+    style N fill:#ebdef0,stroke:#1a5276
+    style O fill:#ebdef0,stroke:#1a5276
+    style P fill:#ebdef0,stroke:#1a5276
+    style Q fill:#ebdef0,stroke:#1a5276
+    style R fill:#d6eaf8,stroke:#1a5276
+    style S fill:#d6eaf8,stroke:#1a5276
+    style T fill:#d6eaf8,stroke:#1a5276
+    style U fill:#d6eaf8,stroke:#1a5276
+    style V fill:#d6eaf8,stroke:#1a5276
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Data Flow in Express CRUD API</h2>
+                <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Routes
+    participant Controller
+    participant Model
+    participant Database
+    
+    Client->>Routes: HTTP Request
+    Routes->>Controller: Forward Request
+    Controller->>Model: Data Operation
+    Model->>Database: Query
+    Database-->>Model: Response
+    Model-->>Controller: Data
+    Controller-->>Routes: Response
+    Routes-->>Client: HTTP Response
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Copy code functionality
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const code = e.target.parentElement.textContent.replace('Copy', '');
+                navigator.clipboard.writeText(code);
+                
+                const originalText = e.target.textContent;
+                e.target.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    e.target.textContent = originalText;
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>
